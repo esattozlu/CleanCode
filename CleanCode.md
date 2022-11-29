@@ -1,6 +1,6 @@
 # CleanCode
 
-##Chapter 1: Clean Code
+## Chapter 1: Clean Code
 ### There Will Be Code
 Code is really the language in which we ultimately express the requirements. We may create languages that are closer to the requirements. We may create tools that help us parse and assemble those requirements into formal structures. But we will never eliminate necessary precision—so there will always be code.
 
@@ -146,34 +146,94 @@ It is just plain silly to have a rule that says that every function must have a 
 
 ## Chapter 5: Formatting
 ### The Purpose of Formatting
+Code formatting is about communication, and communication is the professional developer’s first order of business. The coding style and readability set precedents that continue to affect maintainability and extensibility long after the original code has been changed beyond recognition.
+
 ### Vertical Formatting
+#### The Newspaper Metaphor
+We would like a source file to be like a newspaper article. The name should be simple but explanatory. The name, by itself, should be sufficient to tell us whether we are in the right module or not. The topmost parts of the source file should provide the high-level concepts and algorithms.
+
+#### Vertical Openness Between Concepts
+Nearly all code is read left to right and top to bottom. Each line represents an expression or a clause, and each group of lines represents a complete thought. Those thoughts should be separated from each other with blank lines.
+
+#### Vertical Density
+Lines of code that are tightly related should appear vertically dense. 
+
+#### Vertical Distance
+Closely related concepts should not be separated into different files unless you have a very good reason. We want to avoid forcing our readers to hop around through our source files and classes.
+- Variables should be declared as close to their usage as possible.
+- Instance variables, on the other hand, should be declared at the top of the class.
+- If one function calls another, they should be vertically close, and the caller should be above the callee, if at all possible.
+- Certain bits of code want to be near other bits. They have a certain conceptual affinity. The stronger that affinity, the less vertical distance there should be between them.
+
+#### Vertical Ordering
+In general we want function call dependencies to point in the downward direction. That is, a function that is called should be below a function that does the calling. This creates a nice flow down the source code module from high level to low level.
+
 ### Horizontal Formatting
+#### Horizontal Openness and Density
+We use horizontal white space to associate things that are strongly related and disassociate things that are more weakly related.
+Don't put spaces between the function names and the opening parenthesis. This is because the function and its arguments are closely related. Separating them makes them appear disjoined instead of conjoined. Separate arguments within the function call parenthesis to accentuate the comma and show that the arguments are separate.
+
+#### Indentation
+To make hierarchy of scopes visible, we indent the lines of source code in proportion to their position in the hiearchy. Programmers visually line up lines on the left to see what scope they appear in. This allows them to quickly hop over scopes, such as implementations of if or while statements, that are not relevant to their current situation. Your eye can rapidly discern the structure of the indented file.
+
 ### Team Rules
-### Uncle Bob’s Formatting Rules
+A team of developers should agree upon a single formatting style, and then every member of that team should use that style. We want the software to have a consistent style. We don’t want it to appear to have been written by a bunch of disagreeing individuals.
 
 ## Chapter 6: Objects and Data Structures
 ### Data Abstraction
+Hiding implementation is not just a matter of putting a layer of functions between the variables. Hiding implementation is about abstractions! A class does not simply push its variables out through getters and setters. Rather it exposes abstract interfaces that allow its users to manipulate the essence of the data, without having to know its implementation.
+
 ### Data/Object Anti-Symmetry
+In any complex system there are going to be times when we want to add new data types rather than new functions. For these cases objects and OO are most appropriate. On the other hand, there will also be times when we’ll want to add new functions as opposed to data types. In that case procedural code and data structures will be more appropriate.
+
 ### The Law of Demeter
+The method should not invoke methods on objects that are returned by any of the allowed functions. In other words, talk to friends, not to strangers.
+The Law of Demeter says that a method f of a class C should only call the methods of these:
+- C
+- An object created by f
+- An object passed as an argument to f
+- An object held in an instance variable of C
+
 ### Data Transfer Objects
+The quintessential form of a data structure is a class with public variables and no func- tions. This is sometimes called a data transfer object, or DTO. DTOs are very useful structures, especially when communicating with databases or parsing messages from sockets, and so on. They often become the first in a series of translation stages that convert raw data in a database into objects in the application code.
 
 ## Chapter 7: Error Handling
 ### Use Exceptions Rather Than Return Codes
+The caller must check for errors immediately after the call. Unfortunately, it’s easy to forget. For this reason it is better to throw an exception when you encounter an error.
+
 ### Write Your Try-Catch-Finally Statement First
+In a way, try blocks are like transactions. Your catch has to leave your program in a consistent state, no matter what happens in the try. For this reason it is good practice to start with a try-catch-finally statement when you are writing code that could throw exceptions. This helps you define what the user of that code should expect, no matter what goes wrong with the code that is executed in the try.
+
 ### Use Unchecked Exceptions
+Checked exceptions can sometimes be useful if you are writing a critical library: You must catch them. But in general application development the dependency costs outweigh the benefits.
+
 ### Provide Context with Exceptions
+Create informative error messages and pass them along with your exceptions. Mention the operation that failed and the type of failure. If you are logging in your application, pass along enough information to be able to log the error in your catch.
+
 ### Define Exception Classes in Terms of a Caller’s Needs
+Often a single exception class is fine for a particular area of code. The information sent with the exception can distinguish the errors. Use different classes only if there are times when you want to catch one exception and allow the other one to pass through.
+
 ### Define the Normal Flow
+You wrap external APIs so that you can throw your own exceptions, and you define a handler above your code so that you can deal with any aborted computation. Most of the time this is a great approach, but there are some times when you may not want to abort.
+
 ### Don’t Return Null
+If you are tempted to return null from a method, consider throwing an exception or returning a SPECIAL CASE object instead. If you are calling a null-returning method from a third-party API, consider wrapping that method with a method that either throws an exception or returns a special case object.
+
 ### Don’t Pass Null
+Returning null from methods is bad, but passing null into methods is worse. Unless you are working with an API which expects you to pass null, you should avoid passing null in your code whenever possible.
 
 ## Chapter 8: Boundaries
 ### Using Third-Party Code
+If you use a boundary interface like Map, keep it inside the class, or close family of classes, where it is used. Avoid returning it from, or accepting it as an argument to, public APIs.
+
 ### Exploring and Learning Boundaries
-### Learning log4j
+It’s not our job to test the third-party code, but it may be in our best interest to write tests for the third-party code we use.
+
 ### Learning Tests Are Better Than Free
-### Using Code That Does Not Yet Exist 
+Whether you need the learning provided by the learning tests or not, a clean boundary should be supported by a set of outbound tests that exercise the interface the same way the production code does. Without these boundary tests to ease the migration, we might be tempted to stay with the old version longer than we should.
+
 ### Clean Boundaries
+Code at the boundaries needs clear separation and tests that define expectations. We should avoid letting too much of our code know about the third-party particulars. It’s better to depend on something you control than on something you don’t control, lest it end up controlling you.
 
 ## Chapter 9: Unit Tests
 ### The Three Laws of TDD
